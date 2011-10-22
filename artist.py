@@ -4,6 +4,7 @@ from last.tag import Tag
 from last.album import Album
 from last.track import Track
 from last.event import Event
+from last.image import Image
 
 class ArtistResults(object):
 	def __init__(self, obj):
@@ -31,7 +32,8 @@ class Artist(object):
 	
 	@staticmethod
 	def getImages(artist, limit=50, page=1, autocorrect=1, order='popularity'):
-		raise Exception('Unimplemented.')
+		result = query('artist.getimages', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect, 'order':order})
+		return [Image(i) for i in result.get('images', {}).get('image', [])]
 	
 	@staticmethod
 	def getInfo(artist, autocorrect=1):
@@ -73,14 +75,31 @@ class Artist(object):
 		result = query('artist.gettoptracks', {'artist': artist, 'limit': limit, 'page': page, 'autocorrect': autocorrect})
 		return [Track(t) for t in result.get('toptracks', {}).get('track', [])]
 	
+	@staticmethod
+	def top(limit=50, page=1):
+		result = query('chart.gettopartists', {'limit':limit, 'page':page})
+		return [Artist(a) for a in result.get('artists', {}).get('artist', [])]
+	
+	@staticmethod
+	def get(artist, autocorrect=1, lang='en'):
+		result = query('artist.getinfo', {'artist':artist, 'autocorrect':autocorrect, 'lang':lang})
+		return Artist(result.get('artist', {}))
+	
 	def __init__(self, obj):
 		'''Initialize an artist based on the provided dictionary'''
 		self.name       = obj.get('name', '')
-		self.listeners  = int(obj.get('listeners', 1))
+		stats           = obj.get('stats', None)
+		if stats:
+			self.listeners = int(stats.get('listeners', 0))
+			self.playcount = int(stats.get('playcount', 0))
+		else:
+			self.listeners = int(obj.get('listeners', 0))
+			self.playcount = int(obj.get('playcount', 0))
 		self.mbid       = obj.get('mbid', None)
 		self.url        = obj.get('url', None)
 		self.streamable = bool(obj.get('streamable', False))
 		self.match      = float(obj.get('match', 0))
+		self.bio        = obj.get('bio')
 		self.images     = {}
 		for i in obj.get('image', []):
 			self.images[i.get('size', 'small')] = i.get('#text', None)
@@ -95,4 +114,7 @@ class Artist(object):
 		elif name == 'events':
 			self.events = Artist.getEvents(self.name)
 			return self.events
+		elif name == 'albums':
+			self.albums = Artist.getTopAlbums(self.name)
+			return self.albums
 	
