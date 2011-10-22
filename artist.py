@@ -1,7 +1,9 @@
 from last import query
 from last import LastError
+from last.tag import Tag
 from last.album import Album
 from last.track import Track
+from last.event import Event
 
 class ArtistResults(object):
 	def __init__(self, obj):
@@ -13,19 +15,58 @@ class ArtistResults(object):
 class Artist(object):
 	'''Represents a Last.FM artist'''
 	@staticmethod
-	def search(artist, page=1, limit=50):
+	def search(artist, limit=50, page=1):
 		'''Search for artists by the provided name'''
 		return ArtistResults(query('artist.search', {'artist': artist, 'page':page, 'limit': limit}).get('results', {}))
 	
 	@staticmethod
+	def getCorrection(artist):
+		result = query('artist.getcorrection', {'artist': artist})
+		return [Artist(a.get('artist', {})) for a in result.get('corrections', {}).get('correction', [])]
+	
+	@staticmethod
+	def getEvents(artist, limit=50, page=1, autocorrect=1, festivalsonly=0):
+		result = query('artist.getevents', {'artist':artist, 'autocorrect':1, 'limit':limit, 'page':page, 'festivalsonly':festivalsonly})
+		return [Event(e) for e in result.get('events', {}).get('event', [])]
+	
+	@staticmethod
+	def getImages(artist, limit=50, page=1, autocorrect=1, order='popularity'):
+		raise Exception('Unimplemented.')
+	
+	@staticmethod
+	def getInfo(artist, autocorrect=1):
+		raise Exception('Unimplemented.')
+	
+	@staticmethod
+	def getPastEvents(artist, limit=50, page=1, autocorrect=1):
+		raise Exception('Unimplemented.')
+	
+	@staticmethod
+	def getPodcast(artist, autocorrect=1):
+		raise Exception('Unimplemented.')
+	
+	@staticmethod
+	def getShouts(artist, limit=50, page=1, autocorrect=1):
+		raise Exception('Unimplemented.')
+	
+	@staticmethod
 	def getSimilar(artist, limit=50, autocorrect=1):
-		result = query('artist.getsimilar', {'artist': artist, 'limit': limit, 'autocorrect': autocorrect})
-		return [Artist(a) for a in result.get('similarartists', {}).get('artist', [])]
+		result = query('artist.getsimilar', {'artist':artist, 'limit':limit, 'autocorrect':autocorrect})
+		return [Artist(e) for e in result.get('similarartists', {}).get('artist', [])]
 	
 	@staticmethod
 	def getTopAlbums(artist, limit=50, page=1, autocorrect=1):
 		result = query('artist.gettopalbums', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect})
 		return [Album(a) for a in result.get('topalbums', {}).get('album', [])]
+	
+	@staticmethod
+	def getTopFans(artist, autocorrect=1):
+		raise Exception('Unimplemented.')
+	
+	@staticmethod
+	def getTopTags(artist, autocorrect=1):
+		result = query('artist.gettoptags', {'artist':artist, 'autocorrect':autocorrect})
+		return [Tag(t) for t in result.get('toptags', {}).get('tag', [])]
 	
 	@staticmethod
 	def getTopTracks(artist, limit=50, page=1, autocorrect=1):
@@ -51,4 +92,7 @@ class Artist(object):
 		elif name == 'tracks':
 			self.tracks = Artist.getTopTracks(self.name)
 			return self.tracks
+		elif name == 'events':
+			self.events = Artist.getEvents(self.name)
+			return self.events
 	
