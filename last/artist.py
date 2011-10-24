@@ -23,17 +23,17 @@ class Artist(object):
 	@staticmethod
 	def getCorrection(artist):
 		result = query('artist.getcorrection', {'artist': artist})
-		return [Artist(a.get('artist', {})) for a in result.get('corrections', {}).get('correction', [])]
+		return [Artist(a.get('artist', {})) for a in result.get('corrections', {}).get('correction', []) if isinstance(a)]
 	
 	@staticmethod
 	def getEvents(artist, limit=50, page=1, autocorrect=1, festivalsonly=0):
 		result = query('artist.getevents', {'artist':artist, 'autocorrect':1, 'limit':limit, 'page':page, 'festivalsonly':festivalsonly})
-		return [Event(e) for e in result.get('events', {}).get('event', [])]
+		return [Event(e) for e in result.get('events', {}).get('event', []) if isinstance(e)]
 	
 	@staticmethod
 	def getImages(artist, limit=50, page=1, autocorrect=1, order='popularity'):
 		result = query('artist.getimages', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect, 'order':order})
-		return [Image(i) for i in result.get('images', {}).get('image', [])]
+		return [Image(i) for i in result.get('images', {}).get('image', []) if isinstance(i)]
 	
 	@staticmethod
 	def getInfo(artist, autocorrect=1):
@@ -54,12 +54,15 @@ class Artist(object):
 	@staticmethod
 	def getSimilar(artist, limit=50, autocorrect=1):
 		result = query('artist.getsimilar', {'artist':artist, 'limit':limit, 'autocorrect':autocorrect})
-		return [Artist(e) for e in result.get('similarartists', {}).get('artist', [])]
+		try:
+			return [Artist(e) for e in result.get('similarartists', {}).get('artist', []) if isinstance(e, dict)]
+		except Exception as e:
+			return []
 	
 	@staticmethod
 	def getTopAlbums(artist, limit=50, page=1, autocorrect=1):
 		result = query('artist.gettopalbums', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect})
-		return [Album(a) for a in result.get('topalbums', {}).get('album', [])]
+		return [Album(a) for a in result.get('topalbums', {}).get('album', []) if isinstance(a, dict)]
 	
 	@staticmethod
 	def getTopFans(artist, autocorrect=1):
@@ -68,38 +71,60 @@ class Artist(object):
 	@staticmethod
 	def getTopTags(artist, autocorrect=1):
 		result = query('artist.gettoptags', {'artist':artist, 'autocorrect':autocorrect})
-		return [Tag(t) for t in result.get('toptags', {}).get('tag', [])]
+		return [Tag(t) for t in result.get('toptags', {}).get('tag', []) if isinstance(t, dict)]
 	
 	@staticmethod
 	def getTopTracks(artist, limit=50, page=1, autocorrect=1):
 		result = query('artist.gettoptracks', {'artist': artist, 'limit': limit, 'page': page, 'autocorrect': autocorrect})
-		return [Track(t) for t in result.get('toptracks', {}).get('track', [])]
+		return [Track(t) for t in result.get('toptracks', {}).get('track', []) if isinstance(t, dict)]
 	
 	@staticmethod
 	def top(limit=50, page=1):
 		result = query('chart.gettopartists', {'limit':limit, 'page':page})
-		return [Artist(a) for a in result.get('artists', {}).get('artist', [])]
+		return [Artist(a) for a in result.get('artists', {}).get('artist', []) if isinstance(a)]
 	
 	@staticmethod
 	def get(artist, autocorrect=1, lang='en'):
-		result = query('artist.getinfo', {'artist':artist, 'autocorrect':autocorrect, 'lang':lang})
-		return Artist(result.get('artist', {}))
+		try:
+			result = query('artist.getinfo', {'artist':artist, 'autocorrect':autocorrect, 'lang':lang})
+			return Artist(result.get('artist', {}))
+		except Exception as e:
+			raise LastError(e)
 	
 	def __init__(self, obj):
 		'''Initialize an artist based on the provided dictionary'''
 		self.name       = obj.get('name', '')
 		stats           = obj.get('stats', None)
 		if stats:
-			self.listeners = int(stats.get('listeners', 0))
-			self.playcount = int(stats.get('playcount', 0))
+			# Sometimes parsing an int doesn't work out like you'd hope
+			try:
+				self.listeners = int(stats.get('listeners', 0))
+			except:
+				self.listeners = 0
+			try:
+				self.playcount = int(stats.get('playcount', 0))
+			except:
+				self.playcount = 0
 		else:
-			self.listeners = int(obj.get('listeners', 0))
-			self.playcount = int(obj.get('playcount', 0))
+			try:
+				self.listeners = int(obj.get('listeners', 0))
+			except:
+				self.listeners = 0
+			try:
+				self.playcount = int(obj.get('playcount', 0))
+			except:
+				self.playcount = 0
 		self.mbid       = obj.get('mbid', None)
 		self.url        = obj.get('url', None)
-		self.streamable = bool(obj.get('streamable', False))
-		self.match      = float(obj.get('match', 0))
-		self.bio        = obj.get('bio')
+		try:
+			self.streamable = bool(obj.get('streamable', False))
+		except:
+			self.streamable = False
+		try:
+			self.match      = float(obj.get('match', 0))
+		except:
+			self.match      = 0
+		self.bio        = obj.get('bio', {})
 		self.images     = {}
 		for i in obj.get('image', []):
 			self.images[i.get('size', 'small')] = i.get('#text', None)
@@ -117,4 +142,12 @@ class Artist(object):
 		elif name == 'albums':
 			self.albums = Artist.getTopAlbums(self.name)
 			return self.albums
+		elif name == 'images':
+			self.images = Artist.getImages(self.name)
+			return self.images
 	
+	def __getstate__(self):
+		return self.__dict__
+	
+	def __setstate__(self, d):
+		self.__dict__.update(d)
