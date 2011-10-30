@@ -1,5 +1,5 @@
 from last import query
-from last import LastError
+from last import lasterror
 from last.tag import Tag
 from last.album import Album
 from last.track import Track
@@ -15,81 +15,91 @@ class ArtistResults(object):
 		
 class Artist(object):
 	'''Represents a Last.FM artist'''
+	@lasterror
 	@staticmethod
 	def search(artist, limit=50, page=1):
 		'''Search for artists by the provided name'''
 		return ArtistResults(query('artist.search', {'artist': artist, 'page':page, 'limit': limit}).get('results', {}))
 	
+	@lasterror
 	@staticmethod
 	def getCorrection(artist):
+		'''Get the name correction for the provided artist'''
 		result = query('artist.getcorrection', {'artist': artist})
 		return [Artist(a.get('artist', {})) for a in result.get('corrections', {}).get('correction', []) if isinstance(a)]
 	
+	@lasterror
 	@staticmethod
 	def getEvents(artist, limit=50, page=1, autocorrect=1, festivalsonly=0):
 		result = query('artist.getevents', {'artist':artist, 'autocorrect':1, 'limit':limit, 'page':page, 'festivalsonly':festivalsonly})
 		return [Event(e) for e in result.get('events', {}).get('event', []) if isinstance(e)]
 	
+	@lasterror
 	@staticmethod
 	def getImages(artist, limit=50, page=1, autocorrect=1, order='popularity'):
 		result = query('artist.getimages', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect, 'order':order})
 		return [Image(i) for i in result.get('images', {}).get('image', []) if isinstance(i)]
 	
+	@lasterror
 	@staticmethod
 	def getInfo(artist, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
+	@lasterror
 	@staticmethod
 	def getPastEvents(artist, limit=50, page=1, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
+	@lasterror
 	@staticmethod
 	def getPodcast(artist, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
+	@lasterror
 	@staticmethod
 	def getShouts(artist, limit=50, page=1, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
+	@lasterror
 	@staticmethod
 	def getSimilar(artist, limit=50, autocorrect=1):
 		result = query('artist.getsimilar', {'artist':artist, 'limit':limit, 'autocorrect':autocorrect})
-		try:
-			return [Artist(e) for e in result.get('similarartists', {}).get('artist', []) if isinstance(e, dict)]
-		except Exception as e:
-			return []
+		return [Artist(e) for e in result.get('similarartists', {}).get('artist', []) if isinstance(e, dict)]
 	
+	@lasterror
 	@staticmethod
 	def getTopAlbums(artist, limit=50, page=1, autocorrect=1):
 		result = query('artist.gettopalbums', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect})
 		return [Album(a) for a in result.get('topalbums', {}).get('album', []) if isinstance(a, dict)]
 	
+	@lasterror
 	@staticmethod
 	def getTopFans(artist, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
+	@lasterror
 	@staticmethod
 	def getTopTags(artist, autocorrect=1):
 		result = query('artist.gettoptags', {'artist':artist, 'autocorrect':autocorrect})
 		return [Tag(t) for t in result.get('toptags', {}).get('tag', []) if isinstance(t, dict)]
 	
+	@lasterror
 	@staticmethod
 	def getTopTracks(artist, limit=50, page=1, autocorrect=1):
 		result = query('artist.gettoptracks', {'artist': artist, 'limit': limit, 'page': page, 'autocorrect': autocorrect})
 		return [Track(t) for t in result.get('toptracks', {}).get('track', []) if isinstance(t, dict)]
 	
+	@lasterror
 	@staticmethod
 	def top(limit=50, page=1):
 		result = query('chart.gettopartists', {'limit':limit, 'page':page})
 		return [Artist(a) for a in result.get('artists', {}).get('artist', []) if isinstance(a)]
 	
+	@lasterror
 	@staticmethod
 	def get(artist, autocorrect=1, lang='en'):
-		try:
-			result = query('artist.getinfo', {'artist':artist, 'autocorrect':autocorrect, 'lang':lang})
-			return Artist(result.get('artist', {}))
-		except Exception as e:
-			raise LastError(e)
+		result = query('artist.getinfo', {'artist':artist, 'autocorrect':autocorrect, 'lang':lang})
+		return Artist(result.get('artist', {}))
 	
 	def __init__(self, obj):
 		'''Initialize an artist based on the provided dictionary'''

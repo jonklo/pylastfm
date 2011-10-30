@@ -1,5 +1,5 @@
 from last import query
-from last import LastError
+from last import lasterror
 from last.venue import Venue
 from dateutil import parser
 

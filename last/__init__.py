@@ -25,6 +25,15 @@ class LastError(Exception):
 	def __str__(self):
 		return str(self.value)
 
+def lasterror(fn):
+	'''Wrap the method in a try/except block that raises a LastError'''
+	def wrapped(*args, **kwargs):
+		try:
+			return fn(*args, **kwargs)
+		except Exception as e:
+			raise LastError(e)
+	return wrapped
+
 def query(method, params):
 	"""Send a request command with params to Last.FM API"""
 	try:

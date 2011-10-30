@@ -1,5 +1,5 @@
 from last import query
-from last import LastError
+from last import lasterror
 
 class TrackResults(object):
 	def __init__(self, obj):
@@ -10,6 +10,7 @@ class TrackResults(object):
 		
 class Track(object):
 	'''Represents a Last.FM track'''
+	@lasterror
 	@staticmethod
 	def search(track, artist=None, page=1, limit=30):
 		'''Search for tracks by the provided name'''

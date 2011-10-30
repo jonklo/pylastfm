@@ -1,5 +1,4 @@
 from last import query
-from last import LastError
 
 class TagResults(object):
 	def __init__(self, obj):
@@ -14,4 +13,3 @@ class Tag(object):
 		self.name  = obj.get('name', '')
 		self.count = int(obj.get('count', 0))
 		self.url   = obj.get('url', '')
-	
