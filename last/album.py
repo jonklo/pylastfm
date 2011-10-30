@@ -12,13 +12,13 @@ class AlbumResults(object):
 		
 class Album(object):
 	'''Represents a Last.FM ablum'''
-	@lasterror
 	@staticmethod
+	@lasterror
 	def search(album, limit=50, page=1):
 		return AlbumResults(query('album.search', {'album':album, 'page':page, 'limit': limit}).get('results', {}))
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getBuyLinks(artist, album, autocorrect=1, country='united states'):
 		result = query('album.getbuylinks', {'artist': artist, 'album':album, 'autocorrect':autocorrect, 'country':country})
 		affiliations = []
@@ -26,13 +26,13 @@ class Album(object):
 			affiliations.extend([Affiliation(a, k) for a in v])
 		return affiliations
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getShouts(artist, limit=50, page=1, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getTopTags(artist, album, autocorrect=1):
 		result = query('album.gettoptags', {'artist':artist, 'album':album, 'autocorrect':autocorrect})
 		return [Tag(t) for t in result.get('toptags', {}).get('tag', [])]

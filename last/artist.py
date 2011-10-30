@@ -15,88 +15,88 @@ class ArtistResults(object):
 		
 class Artist(object):
 	'''Represents a Last.FM artist'''
-	@lasterror
 	@staticmethod
+	@lasterror
 	def search(artist, limit=50, page=1):
 		'''Search for artists by the provided name'''
 		return ArtistResults(query('artist.search', {'artist': artist, 'page':page, 'limit': limit}).get('results', {}))
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getCorrection(artist):
 		'''Get the name correction for the provided artist'''
 		result = query('artist.getcorrection', {'artist': artist})
-		return [Artist(a.get('artist', {})) for a in result.get('corrections', {}).get('correction', []) if isinstance(a)]
+		return [Artist(a.get('artist', {})) for a in result.get('corrections', {}).get('correction', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getEvents(artist, limit=50, page=1, autocorrect=1, festivalsonly=0):
 		result = query('artist.getevents', {'artist':artist, 'autocorrect':1, 'limit':limit, 'page':page, 'festivalsonly':festivalsonly})
-		return [Event(e) for e in result.get('events', {}).get('event', []) if isinstance(e)]
+		return [Event(e) for e in result.get('events', {}).get('event', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getImages(artist, limit=50, page=1, autocorrect=1, order='popularity'):
 		result = query('artist.getimages', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect, 'order':order})
-		return [Image(i) for i in result.get('images', {}).get('image', []) if isinstance(i)]
+		return [Image(i) for i in result.get('images', {}).get('image', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getInfo(artist, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getPastEvents(artist, limit=50, page=1, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getPodcast(artist, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getShouts(artist, limit=50, page=1, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getSimilar(artist, limit=50, autocorrect=1):
 		result = query('artist.getsimilar', {'artist':artist, 'limit':limit, 'autocorrect':autocorrect})
-		return [Artist(e) for e in result.get('similarartists', {}).get('artist', []) if isinstance(e, dict)]
+		return [Artist(e) for e in result.get('similarartists', {}).get('artist', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getTopAlbums(artist, limit=50, page=1, autocorrect=1):
 		result = query('artist.gettopalbums', {'artist':artist, 'limit':limit, 'page':page, 'autocorrect':autocorrect})
-		return [Album(a) for a in result.get('topalbums', {}).get('album', []) if isinstance(a, dict)]
+		return [Album(a) for a in result.get('topalbums', {}).get('album', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getTopFans(artist, autocorrect=1):
 		raise Exception('Unimplemented.')
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getTopTags(artist, autocorrect=1):
 		result = query('artist.gettoptags', {'artist':artist, 'autocorrect':autocorrect})
-		return [Tag(t) for t in result.get('toptags', {}).get('tag', []) if isinstance(t, dict)]
+		return [Tag(t) for t in result.get('toptags', {}).get('tag', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def getTopTracks(artist, limit=50, page=1, autocorrect=1):
 		result = query('artist.gettoptracks', {'artist': artist, 'limit': limit, 'page': page, 'autocorrect': autocorrect})
-		return [Track(t) for t in result.get('toptracks', {}).get('track', []) if isinstance(t, dict)]
+		return [Track(t) for t in result.get('toptracks', {}).get('track', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def top(limit=50, page=1):
 		result = query('chart.gettopartists', {'limit':limit, 'page':page})
-		return [Artist(a) for a in result.get('artists', {}).get('artist', []) if isinstance(a)]
+		return [Artist(a) for a in result.get('artists', {}).get('artist', [])]
 	
-	@lasterror
 	@staticmethod
+	@lasterror
 	def get(artist, autocorrect=1, lang='en'):
 		result = query('artist.getinfo', {'artist':artist, 'autocorrect':autocorrect, 'lang':lang})
 		return Artist(result.get('artist', {}))
@@ -135,9 +135,9 @@ class Artist(object):
 		except:
 			self.match      = 0
 		self.bio        = obj.get('bio', {})
-		self.images     = {}
+		self.image      = {}
 		for i in obj.get('image', []):
-			self.images[i.get('size', 'small')] = i.get('#text', None)
+			self.image[i.get('size', 'small')] = i.get('#text', None)
 	
 	def __getattr__(self, name):
 		if name == 'similar':

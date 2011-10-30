@@ -10,8 +10,8 @@ class TrackResults(object):
 		
 class Track(object):
 	'''Represents a Last.FM track'''
-	@lasterror
 	@staticmethod
+	@lasterror
 	def search(track, artist=None, page=1, limit=30):
 		'''Search for tracks by the provided name'''
 		params = {'track': track, 'page':page, 'limit': limit}
