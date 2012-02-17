@@ -19,6 +19,14 @@ class Track(object):
 			params['artist'] = artist
 		return TrackResults(query('track.search', params).get('results', {}))
 	
+	def dict(self):
+		'''Returns a dictionary representation of self. This is
+		particularly useful if, say, you want to JSON-encode this'''
+
+		# These are all the attributes that are primitives already
+		atts = ('name', 'listeners', 'playcount', 'mbid', 'url', 'match', 'images')
+		return dict((key, self.__getattribute__(key)) for key in atts)
+	
 	def __init__(self, obj):
 		'''Initialize an artist based on the provided dictionary'''
 		self.name       = obj.get('name', '')

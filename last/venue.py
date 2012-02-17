@@ -9,6 +9,15 @@ class VenueResults(object):
 		self.artists = [Artist(a) for a in obj.get('artistmatches', {}).get('artist', [])]
 		
 class Venue(object):
+	def dict(self):
+		'''Returns a dictionary representation of self. This is
+		particularly useful if, say, you want to JSON-encode this'''
+		
+		# These are all the attributes that are primitives already
+		atts = ('id', 'name', 'location', 'city', 'country', 'street',
+			'postalcode', 'url', 'website', 'phonenumber', 'images')
+		return dict((key, self.__getattribute__(key)) for key in atts)
+	
 	def __init__(self, obj):
 		'''Initialize an event based on the provided dictionary'''
 		self.id          = obj.get('id', '')

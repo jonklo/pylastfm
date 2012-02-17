@@ -6,6 +6,11 @@ from last.track import Track
 from last.event import Event
 from last.image import Image
 
+try:
+	import simplejson as json
+except:
+	import json
+
 class ArtistResults(object):
 	def __init__(self, obj):
 		self.searchTerms  = obj.get('opensearch:Query', {}).get('searchTerms', '')
@@ -101,6 +106,24 @@ class Artist(object):
 		result = query('artist.getinfo', {'artist':artist, 'autocorrect':autocorrect, 'lang':lang})
 		return Artist(result.get('artist', {}))
 	
+	def dict(self):
+		'''Returns a dictionary representation of self. This is
+		particularly useful if, say, you want to JSON-encode this'''
+		
+		# These are all the attributes that are primitives already
+		atts = ('name', 'listeners', 'playcount', 'mbid', 'url',
+			'streamable', 'match', 'bio', 'image', 'tags')
+		d = dict((key, self.__getattribute__(key)) for key in atts)
+		# These are all the attributes that 1) may not exist, or 2)
+		# are classes and thus need to themselves be encoded
+		atts = ('similar', 'tracks', 'events', 'albums', 'images')
+		for key in atts:
+			try:
+				d[key] = [v.dict() for v in self.__getattribute__(key)]
+			except:
+				pass
+		return d
+	
 	def __init__(self, obj):
 		'''Initialize an artist based on the provided dictionary'''
 		self.name       = obj.get('name', '')
@@ -138,6 +161,7 @@ class Artist(object):
 		self.image      = {}
 		for i in obj.get('image', []):
 			self.image[i.get('size', 'small')] = i.get('#text', None)
+		self.tags       = obj.get('tags', {})
 	
 	def __getattr__(self, name):
 		if name == 'similar':
@@ -155,6 +179,9 @@ class Artist(object):
 		elif name == 'images':
 			self.images = Artist.getImages(self.name)
 			return self.images
+		elif name == 'tags':
+			self.tags = Artist.gettopTags(self.name)
+			return self.tags
 	
 	def __getstate__(self):
 		return self.__dict__

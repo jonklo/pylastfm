@@ -8,6 +8,14 @@ class TagResults(object):
 		self.artists = [Artist(a) for a in obj.get('artistmatches', {}).get('artist', [])]
 		
 class Tag(object):
+	def dict(self):
+		'''Returns a dictionary representation of self. This is
+		particularly useful if, say, you want to JSON-encode this'''
+		
+		# These are all the attributes that are primitives already
+		atts = ('name', 'count', 'url')
+		return dict((key, self.__getattribute__(key)) for key in atts)
+	
 	def __init__(self, obj):
 		'''Initialize an event based on the provided dictionary'''
 		self.name  = obj.get('name', '')

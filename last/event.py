@@ -11,6 +11,20 @@ class EventResults(object):
 		self.artists = [Artist(a) for a in obj.get('artistmatches', {}).get('artist', [])]
 		
 class Event(object):
+	def dict(self):
+		'''Returns a dictionary representation of self. This is
+		particularly useful if, say, you want to JSON-encode this'''
+		
+		# These are all the attributes that are primitives already
+		atts = ('id', 'title', 'artists', 'headliner', 'startDate', 
+			'description', 'images', 'attendance', 'review', 'tag',
+			'url', 'website', 'tickets', 'cancelled', 'tags')
+		d = dict((key, self.__getattribute__(key)) for key in atts)
+		# These are all the attributes that 1) may not exist, or 2)
+		# are classes and thus need to themselves be encoded
+		d['venue'] = self.venue.dict();
+		return d
+	
 	def __init__(self, obj):
 		'''Initialize an event based on the provided dictionary'''
 		self.id          = obj.get('id', '')

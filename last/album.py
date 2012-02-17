@@ -37,6 +37,23 @@ class Album(object):
 		result = query('album.gettoptags', {'artist':artist, 'album':album, 'autocorrect':autocorrect})
 		return [Tag(t) for t in result.get('toptags', {}).get('tag', [])]
 	
+	def dict(self):
+		'''Returns a dictionary representation of self. This is
+		particularly useful if, say, you want to JSON-encode this'''
+
+		# These are all the attributes that are primitives already
+		atts = ('name', 'playcount', 'mbid', 'url', 'match', 'artist', 'images')
+		d = dict((key, self.__getattribute__(key)) for key in atts)
+		# These are all the attributes that 1) may not exist, or 2)
+		# are classes and thus need to themselves be encoded
+		atts = ('buylinks', 'tags')
+		for key in atts:
+			try:
+				d[key] = [v.dict() for v in self.__getattribute__(key)]
+			except:
+				pass
+		return d
+	
 	def __init__(self, obj):
 		'''Initialize an artist based on the provided dictionary'''
 		self.name       = obj.get('name', '')
