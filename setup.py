@@ -6,7 +6,7 @@ except ImportError:
 	from distutils.core import setup
 
 setup(name = 'last',
-	version = '0.1',
+	version = '0.2',
 	description = 'Last.FM API interface',
 	long_description = 'A Pythonic interface to the Last.FM API',
 	author = 'Dan Lecocq',
