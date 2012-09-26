@@ -3,7 +3,12 @@
 
 import urllib                           # For parsing urls
 import urllib2                          # For loading urls
-import simplejson as json               # For parsing results
+
+# For parsing results
+try:
+	import json
+except ImportError:
+	import simplejson as json
 
 __author__     = "Dan Lecocq"
 __copyright__  = "Copyright 2011, Ingenious Designs Inc."
