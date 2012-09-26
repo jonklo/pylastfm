@@ -13,6 +13,7 @@ setup(name = 'last',
 	author_email = 'dan@lecocq.us',
 	url = 'http://github.com/ingeniousdesigns/last',
 	packages = ['last'],
+	install_requires=['python-dateutil'],
 	platforms = 'Posix; MacOS X; Windows',
 	classifiers = []
 )
